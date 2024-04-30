@@ -8,67 +8,67 @@ This is a text editor inspired by vim. The funtion is to save files compressed a
 
 1. Install WSL2 (in admin powershell)
 
-```powershell
-wsl --install
-```
+   ```powershell
+   wsl --install
+   ```
 
 1. Install Ubuntu 20.04
 
-```powershell
-wsl --set-version Ubuntu-20.04 2
-```
+   ```powershell
+   wsl --set-version Ubuntu-20.04 2
+   ```
 
 ### C++ and ncurses (Ubuntu 20.04)
 
 1. Install c++ build tools
 
-```bash
-sudo apt-get update
-sudo apt-get install build-essential
-```
+   ```bash
+   sudo apt-get update
+   sudo apt-get install build-essential
+   ```
 
 1. Install ncurses
 
-```bash
-sudo apt-get install libncurses5-dev libncursesw5-dev
-```
+   ```bash
+   sudo apt-get install libncurses5-dev libncursesw5-dev
+   ```
 
 ### C++ and ncurses (Fedora)
 
 1. Install c++ build tools
 
-```bash
-sudo dnf install gcc-c++
-```
+   ```bash
+   sudo dnf install gcc-c++
+   ```
 
 1. Install ncurses
 
-```bash
-sudo dnf install ncurses-devel
-```
+   ```bash
+   sudo dnf install ncurses-devel
+   ```
 
 ### Build
 
 1. Clone the repository
 
-```bash
-git clone https://github.com/msosav/CVCS-Text-Editor
-```
+   ```bash
+   git clone https://github.com/msosav/CVCS-Text-Editor
+   ```
 
 1. Build the project
 
-```bash
-cd CVCS-Text-Editor
-make
-```
+   ```bash
+   cd CVCS-Text-Editor
+   make
+   ```
 
 ## Usage
 
 1. Run the editor
 
-```bash
-./cvcs <filename>
-```
+   ```bash
+   ./cvcs <filename>
+   ```
 
 ## References
 
