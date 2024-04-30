@@ -6,10 +6,11 @@
 #include <string>
 #include <cctype>
 
-#include "screen.h"
-#include "cursor.h"
+#include "../Screen/screen.h"
+#include "../Cursor/cursor.h"
 
-enum class Mode {
+enum class Mode
+{
 	NORMAL = 0,
 	INSERT,
 	REPLACE
@@ -21,8 +22,9 @@ static const int SPACES_FOR_TAB = 8;
 static const int ENTER_KEY = '\xA';
 
 // The core functionality of Vimperor.
-class Editor {
-	FILE* file;
+class Editor
+{
+	FILE *file;
 	Screen screen;
 	Mode current_mode{Mode::NORMAL};
 	std::vector<std::string> file_contents{create_file_contents()};
@@ -37,8 +39,8 @@ class Editor {
 	void move_cursor_left() noexcept;
 	void move_cursor_right() noexcept;
 	void move_cursor_x_considering_lines(
-			const std::string& line_considered,
-			const std::string& current_line) noexcept;
+		const std::string &line_considered,
+		const std::string &current_line) noexcept;
 
 	void normal_mode_action(int character) noexcept;
 	void insert_mode_action(int character) noexcept;
@@ -52,13 +54,14 @@ class Editor {
 	void delete_char() noexcept;
 	void save() noexcept;
 	void add_new_line() noexcept;
+
 public:
-	Editor(const char* file_name = "") noexcept;
-	Editor(const Editor& e) = delete;
-	Editor& operator=(const Editor& e) = delete;
+	Editor(const char *file_name = "") noexcept;
+	Editor(const Editor &e) = delete;
+	Editor &operator=(const Editor &e) = delete;
 
 	void process_keypress(int character) noexcept;
-	
+
 	~Editor();
 };
 
