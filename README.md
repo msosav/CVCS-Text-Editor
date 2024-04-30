@@ -6,11 +6,11 @@ This is a text editor inspired by vim. The funtion is to save files compressed a
 
 ### WSL2
 
-1. Install WSL2 (in admin powershell)
+Install WSL2 (in admin powershell)
 
-   ```powershell
-   wsl --install
-   ```
+```powershell
+wsl --install
+```
 
 ### C++ and ncurses (Ubuntu 20.04)
 
@@ -58,11 +58,11 @@ This is a text editor inspired by vim. The funtion is to save files compressed a
 
 ## Usage
 
-1. Run the editor
+Run the editor
 
-   ```bash
-   ./cvcs <filename>
-   ```
+```bash
+./cvcs <filename>
+```
 
 ## References
 
