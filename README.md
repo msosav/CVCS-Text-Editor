@@ -12,12 +12,6 @@ This is a text editor inspired by vim. The funtion is to save files compressed a
    wsl --install
    ```
 
-1. Install Ubuntu 20.04
-
-   ```powershell
-   wsl --set-version Ubuntu-20.04 2
-   ```
-
 ### C++ and ncurses (Ubuntu 20.04)
 
 1. Install c++ build tools
