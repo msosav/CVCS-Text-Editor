@@ -1,4 +1,4 @@
-CPP_FLAGS = -std=c++14 -Wall -Werror -Wpedantic -Weffc++
+CPP_FLAGS = -std=c++17 -Wall -Werror -Wpedantic -Weffc++
 
 FILES = Screen/screen.cpp Editor/editor.cpp main.cpp
 

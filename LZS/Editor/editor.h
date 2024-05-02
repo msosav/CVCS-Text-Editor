@@ -56,7 +56,7 @@ class Editor
 	void add_new_line() noexcept;
 
 public:
-	Editor(const char *file_name = "") noexcept;
+	Editor(const char *file_name = "", const char *mode = "") noexcept;
 	Editor(const Editor &e) = delete;
 	Editor &operator=(const Editor &e) = delete;
 
