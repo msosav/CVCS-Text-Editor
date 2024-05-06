@@ -1,14 +1,14 @@
 #include "editor.h"
 
-Editor::Editor(const char *file_name, const char *mode) noexcept
-	: file{fopen(file_name, mode)}, screen{file_name}
+Editor::Editor(const std::vector<std::string> &content) noexcept
+    : screen{""}, file_contents{content}
 {
-	screen.display(std::begin(file_contents),
-				   std::end(file_contents),
-				   cursor);
+    screen.display(std::begin(file_contents),
+                   std::end(file_contents),
+                   cursor);
 }
 
-std::vector<std::string> Editor::create_file_contents() noexcept
+std::vector<std::string> Editor::create_file_contents(FILE *file) const noexcept
 {
 	std::vector<std::string> file_contents;
 	std::string file_line;
@@ -81,9 +81,6 @@ void Editor::normal_mode_action(int character) noexcept
 		break;
 	case 'R':
 		current_mode = Mode::REPLACE;
-		break;
-	case 's':
-		save();
 		break;
 	}
 }
@@ -359,18 +356,3 @@ void Editor::replace_char(int character) noexcept
 	screen.is_file_modified = true;
 }
 
-void Editor::save() noexcept
-{
-	rewind(file);
-	for (const auto &str : file_contents)
-	{
-		fputs(str.c_str(), file);
-		fputs("\n", file);
-	}
-	screen.is_file_modified = false;
-}
-
-Editor::~Editor()
-{
-	fclose(file);
-}
