@@ -7,6 +7,7 @@
 
 #include "../Screen/screen.h"
 #include "../Cursor/cursor.h"
+#include "../Compressing/LZS.h"
 
 enum class Mode
 {
@@ -20,10 +21,10 @@ static const int BACKSPACE_KEY = '\x7F';
 static const int SPACES_FOR_TAB = 8;
 static const int ENTER_KEY = '\xA';
 
-// The core functionality of Vimperor.
 class Editor
 {
     Screen screen;
+    LZS lsz;
     Mode current_mode{Mode::NORMAL};
     std::vector<std::string> file_contents;
     Cursor cursor{};
@@ -56,7 +57,8 @@ public:
     Editor &operator=(const Editor &e) = delete;
 
     void process_keypress(int character) noexcept;
-    std::vector<std::string> create_file_contents(FILE *file) const noexcept; // New method to get content
+    std::vector<std::string> create_file_contents(FILE *file) const noexcept;
+    std::vector<std::string> get_file_contents() const noexcept;
 };
 
 #endif

@@ -1,4 +1,5 @@
 #include "Editor/editor.h"
+#include "Compressing/LZS.h"
 #include <ncurses.h>
 #include <filesystem>
 #include <iostream>
@@ -9,31 +10,53 @@ void run_editor(const char *file_name)
     std::cout << "File exists: " << std::filesystem::exists(file_name) << std::endl;
     if (std::filesystem::exists(file_name))
     {
-        FILE *file;
-        file = fopen(file_name, "r+");
-        std::vector<std::string> content;
-        Editor e;
-
-        if (file != nullptr)
+        if (std::filesystem::path(file_name).extension() == ".bin")
         {
-            content = e.create_file_contents(file);
-            fclose(file);
+            // File is a binary file, decompress it and load its content into the editor
+            std::string output_file_name = std::string(file_name) + ".txt"; // Assume the decompressed file will have a .txt extension
+            LZS lzs;
+            std::vector<std::string> content = lzs.descomprimir(file_name);
+            Editor e;
+
+            // Initialize Editor with file content
+            Editor ed(content);
+
+            int character;
+            while (true)
+            {
+                character = getch();
+                ed.process_keypress(character);
+            }
         }
         else
         {
-            // Handle error opening file
-            std::cerr << "Error opening file\n";
-            return;
-        }
+            // File is not a binary file, load its content directly into the editor
+            FILE *file;
+            file = fopen(file_name, "r+");
+            std::vector<std::string> content;
+            Editor e;
 
-        // Initialize Editor with file content
-        Editor ed(content);
+            if (file != nullptr)
+            {
+                content = e.create_file_contents(file);
+                fclose(file);
+            }
+            else
+            {
+                // Handle error opening file
+                std::cerr << "Error opening file\n";
+                return;
+            }
 
-        int character;
-        while (true)
-        {
-            character = getch();
-            ed.process_keypress(character);
+            // Initialize Editor with file content
+            Editor ed(content);
+
+            int character;
+            while (true)
+            {
+                character = getch();
+                ed.process_keypress(character);
+            }
         }
     }
     else
@@ -50,6 +73,7 @@ void run_editor(const char *file_name)
         }
     }
 }
+
 
 int main(int argc, char **argv)
 {

@@ -1,7 +1,7 @@
 #include "editor.h"
 
 Editor::Editor(const std::vector<std::string> &content) noexcept
-    : screen{""}, file_contents{content}
+    : screen{"", content}, lsz(), file_contents{content}
 {
     screen.display(std::begin(file_contents),
                    std::end(file_contents),
@@ -25,6 +25,13 @@ std::vector<std::string> Editor::create_file_contents(FILE *file) const noexcept
 			file_line = "";
 		}
 	}
+	return file_contents;
+}
+
+std::vector<std::string> Editor::get_file_contents() const noexcept
+{
+	std::vector<std::string> file_contents;
+	file_contents = screen.get_content();
 	return file_contents;
 }
 
@@ -56,6 +63,8 @@ void Editor::normal_mode_action(int character) noexcept
 		break;
 	case 'q':
 		endwin();
+		file_contents = get_file_contents();
+		lsz.comprimir(file_contents, "prueba.bin");
 		exit(1);
 		break;
 	case 'l':
