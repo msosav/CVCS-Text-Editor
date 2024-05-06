@@ -13,6 +13,7 @@ void LZS::inicializar_diccionario() {
         std::string ch(1, char(i));
         dictionary[ch] = i;
     }
+    dictionary["\n"] = 256;
 }
 
 void LZS::comprimir(std::vector<std::string> &content, const std::string &output_file) {
@@ -34,18 +35,19 @@ void LZS::comprimir(std::vector<std::string> &content, const std::string &output
                 if (dictionary.size() < static_cast<size_t>(MAX_DICT_SIZE)) {
                     dictionary[temp] = static_cast<int>(dictionary.size());
                 }
-                current = ch;  // Reset current to the current character
+                current = std::string(1, ch);  // Reset current to the current character
             }
         }
-        // Add a newline character to the compressed output after each line
+    }
+
+
+    if (!current.empty()) {
         escribir_codigo(dictionary[current], fout);
-        current.clear(); // Clear current to start a new line
     }
 
     fout.close(); // Close the output file stream
     std::cout << "Archivo comprimido con éxito!" << std::endl;
 }
-
 
 std::vector<std::string> LZS::descomprimir(const std::string &input_file) {
     std::ifstream fin(input_file, std::ios::binary);
@@ -85,6 +87,8 @@ std::vector<std::string> LZS::descomprimir(const std::string &input_file) {
     std::cout << "Archivo descomprimido con éxito!" << std::endl;
     return output_buffer;
 }
+
+
 
 void LZS::escribir_codigo(int code, std::ofstream &fout) {
     fout.write(reinterpret_cast<const char*>(&code), sizeof(code));

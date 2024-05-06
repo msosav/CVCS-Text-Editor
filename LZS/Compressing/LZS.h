@@ -7,11 +7,10 @@
 #include <vector>
 #include <iomanip>
 
-class LZS
-{
+class LZS {
 private:
     std::unordered_map<std::string, int> dictionary;
-    const int MAX_DICT_SIZE = 16384;
+    static const int MAX_DICT_SIZE = 16384; // Declare MAX_DICT_SIZE as static const
 
 public:
     LZS();
@@ -25,4 +24,4 @@ private:
     void escribir_codigo(int code, std::ofstream &fout);
 };
 
-#endif
+#endif // LZS_H

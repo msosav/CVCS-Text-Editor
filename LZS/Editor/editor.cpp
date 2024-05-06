@@ -28,12 +28,6 @@ std::vector<std::string> Editor::create_file_contents(FILE *file) const noexcept
 	return file_contents;
 }
 
-std::vector<std::string> Editor::get_file_contents() const noexcept
-{
-	std::vector<std::string> file_contents;
-	file_contents = screen.get_content();
-	return file_contents;
-}
 
 void Editor::process_keypress(int character) noexcept
 {
@@ -63,7 +57,6 @@ void Editor::normal_mode_action(int character) noexcept
 		break;
 	case 'q':
 		endwin();
-		file_contents = get_file_contents();
 		lsz.comprimir(file_contents, "prueba.bin");
 		exit(1);
 		break;
