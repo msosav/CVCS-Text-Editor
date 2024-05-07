@@ -1,13 +1,14 @@
 #ifndef EDITOR_H
 #define EDITOR_H
 
-#include <ncurses.h>
+//#include <ncurses.h>
 #include <vector>
 #include <string>
 #include <cctype>
 
 #include "../Screen/screen.h"
 #include "../Cursor/cursor.h"
+#include "../Compress/LZ78.h"
 
 enum class Mode
 {
@@ -24,15 +25,17 @@ static const int ENTER_KEY = '\xA';
 // The core functionality of Vimperor.
 class Editor
 {
-	FILE *file;
+	//FILE *file;
 	Screen screen;
+	LZ78 lz78;
 	Mode current_mode{Mode::NORMAL};
-	std::vector<std::string> file_contents{create_file_contents()};
+	//std::vector<std::string> file_contents{create_file_contents()};
+	std::vector<std::string> file_contents;
 	Cursor cursor{};
 	std::size_t file_contents_index = 0;
 	std::size_t top_of_screen_index = 0;
 
-	std::vector<std::string> create_file_contents() noexcept;
+	//std::vector<std::string> create_file_contents() noexcept;
 
 	void move_cursor_down() noexcept;
 	void move_cursor_up() noexcept;
@@ -52,17 +55,19 @@ class Editor
 	void insert_char(int character) noexcept;
 	void replace_char(int character) noexcept;
 	void delete_char() noexcept;
-	void save() noexcept;
+	//void save() noexcept;
 	void add_new_line() noexcept;
 
 public:
-	Editor(const char *file_name = "") noexcept;
+	Editor(const char *file_name = "", const std::vector<std::string> &content = {}) noexcept;
 	Editor(const Editor &e) = delete;
 	Editor &operator=(const Editor &e) = delete;
 
 	void process_keypress(int character) noexcept;
+	std::vector<std::string> create_file_contents(FILE *file) const noexcept;
+    std::vector<std::string> get_file_contents() const noexcept;
 
-	~Editor();
+	//~Editor();
 };
 
 #endif

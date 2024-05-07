@@ -26,9 +26,9 @@ class Editor
     Screen screen;
     LZS lsz;
     Mode current_mode{Mode::NORMAL};
-    std::vector<std::string> file_contents;
+    std::vector<std::string> file_buffer;
     Cursor cursor{};
-    std::size_t file_contents_index = 0;
+    std::size_t file_buffer_index = 0;
     std::size_t top_of_screen_index = 0;
 
     void move_cursor_down() noexcept;
@@ -52,13 +52,13 @@ class Editor
     void add_new_line() noexcept;
 
 public:
-    Editor(const char *file_name = "", const std::vector<std::string> &content = {}) noexcept;
+    Editor(const char *file_name = "", const std::vector<std::string> &buffer = {}, const char *output_file_name = "prueba") noexcept;
     Editor(const Editor &e) = delete;
     Editor &operator=(const Editor &e) = delete;
 
     void process_keypress(int character) noexcept;
-    std::vector<std::string> create_file_contents(FILE *file) const noexcept;
-    std::vector<std::string> get_file_contents() const noexcept;
+    std::vector<std::string> create_file_buffer(FILE *file) const noexcept;
+    std::vector<std::string> get_file_buffer() const noexcept;
 };
 
 #endif

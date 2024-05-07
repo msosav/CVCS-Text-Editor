@@ -10,17 +10,19 @@
 class LZS {
 private:
     std::unordered_map<std::string, int> dictionary;
-    static const int MAX_DICT_SIZE = 16384; // Declare MAX_DICT_SIZE as static const
 
 public:
     LZS();
-
-    void comprimir(std::vector<std::string> &content, const std::string &output_file);
-    std::vector<std::string> descomprimir(const std::string &input_file);
+    void compress(std::vector<std::string> &buffer, const std::string &output_file);
+    std::vector<std::string> decompress(const std::string &input_file);
+    std::string rle_compress(const std::string &text);
+    std::string rle_decompress(const std::string &text);
+    void lzw_compress(const std::string &text, std::ofstream &fout);
+    std::string lzw_decompress(std::ifstream &fin);
 
 private:
-    void inicializar_diccionario();
-    void escribir_codigo(int code, std::ofstream &fout);
+    void initialize_dictionary();
+    void write_code(int code, std::ofstream &fout);
 };
 
 #endif // LZS_H

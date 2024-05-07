@@ -6,12 +6,11 @@
 
 LZS::LZS() : dictionary()
 {
-    inicializar_diccionario();
+    initialize_dictionary();
 }
 
-void LZS::inicializar_diccionario()
+void LZS::initialize_dictionary()
 {
-    // Inicializar el diccionario con los caracteres ASCII
     for (int i = 0; i < 256; ++i)
     {
         std::string ch(1, char(i));
@@ -19,7 +18,7 @@ void LZS::inicializar_diccionario()
     }
 }
 
-std::string juntar_vector(const std::vector<std::string> &v)
+std::string join_vector(const std::vector<std::string> &v)
 {
     std::string result;
     for (const std::string &line : v)
@@ -29,19 +28,81 @@ std::string juntar_vector(const std::vector<std::string> &v)
     return result;
 }
 
-void LZS::comprimir(std::vector<std::string> &content, const std::string &output_file)
+std::string LZS::rle_compress(const std::string &text)
 {
-    std::ofstream fout(output_file, std::ios::binary);
+    std::string encoded_text;
+    char last_char = '\0';
+    int count = 1;
 
-    if (!fout)
+    for (char ch : text)
     {
-        std::cerr << "Error opening output file." << std::endl;
-        return;
+        if (ch == last_char)
+        {
+            count++;
+        }
+        else
+        {
+            if (count > 1)
+            {
+                encoded_text += std::to_string(count) + last_char;
+            }
+            else if (count == 1)
+            {
+                encoded_text += last_char;
+            }
+            count = 1;
+            last_char = ch;
+        }
     }
 
-    std::string text = juntar_vector(content);
+    if (count > 1)
+    {
+        encoded_text += std::to_string(count) + last_char;
+    }
+    else if (count == 1)
+    {
+        encoded_text += last_char;
+    }
 
-    std::string current;
+    return encoded_text;
+}
+
+std::string LZS::rle_decompress(const std::string &text)
+{
+    std::string decoded_text;
+    std::string count_str;
+    for (char ch : text)
+    {
+        if (std::isdigit(ch))
+        {
+            count_str += ch;
+        }
+        else
+        {
+            if (count_str.empty())
+            {
+                decoded_text += ch;
+            }
+            else
+            {
+                int count = std::stoi(count_str);
+                decoded_text.append(count, ch);
+                count_str.clear();
+            }
+        }
+    }
+
+    if (!count_str.empty())
+    {
+        std::cerr << "Error de descompresión: cadena no válida." << std::endl;
+    }
+
+    return decoded_text;
+}
+
+void::LZS::lzw_compress(const std::string &text, std::ofstream &fout)
+{
+std::string current;
     for (char ch : text)
     {
         std::string temp = current + ch;
@@ -52,7 +113,7 @@ void LZS::comprimir(std::vector<std::string> &content, const std::string &output
         }
         else
         {
-            escribir_codigo(dictionary[current], fout);
+            write_code(dictionary[current], fout);
             dictionary[temp] = dictionary.size();
             current = std::string(1, ch);
         }
@@ -60,29 +121,16 @@ void LZS::comprimir(std::vector<std::string> &content, const std::string &output
 
     if (!current.empty())
     {
-        escribir_codigo(dictionary[current], fout);
+        write_code(dictionary[current], fout);
     }
-
-    fout.close(); // Close the output file stream
-    std::cout << "Archivo comprimido con éxito!" << std::endl;
 }
 
-std::vector<std::string> LZS::descomprimir(const std::string &input_file)
-{
-    std::ifstream fin(input_file, std::ios::binary);
-    std::vector<std::string> output_buffer;
-
-    if (!fin)
-    {
-        std::cerr << "Error al abrir el archivo de entrada." << std::endl;
-        return output_buffer; // Devuelve un buffer vacío en caso de error
-    }
-
-    std::vector<std::string> dictionaryReverse;
+std::string LZS::lzw_decompress(std::ifstream &fin){
+    std::vector<std::string> dictionary_reverse;
     for (int i = 0; i < 256; ++i)
     {
         std::string ch(1, char(i));
-        dictionaryReverse.push_back(ch);
+        dictionary_reverse.push_back(ch);
     }
 
     int code;
@@ -90,58 +138,93 @@ std::vector<std::string> LZS::descomprimir(const std::string &input_file)
     std::string previous, entry;
     if (fin.read(reinterpret_cast<char *>(&code), sizeof(code)))
     {
-        if (code < static_cast<int>(dictionaryReverse.size()))
+        if (code < static_cast<int>(dictionary_reverse.size()))
         {
-            entry = dictionaryReverse[code];
+            entry = dictionary_reverse[code];
             decompressed_text += entry;
             previous = entry;
         }
         else
         {
             std::cerr << "Error de descompresión: código no válido." << std::endl;
-            return output_buffer;
+            return decompressed_text;
         }
     }
 
     while (fin.read(reinterpret_cast<char *>(&code), sizeof(code)))
     {
-        if (code < static_cast<int>(dictionaryReverse.size()))
+        if (code < static_cast<int>(dictionary_reverse.size()))
         {
-            entry = dictionaryReverse[code];
+            entry = dictionary_reverse[code];
             decompressed_text += entry;
-            dictionaryReverse.push_back(previous + entry[0]);
+            dictionary_reverse.push_back(previous + entry[0]);
         }
-        else if (code == static_cast<int>(dictionaryReverse.size()))
+        else if (code == static_cast<int>(dictionary_reverse.size()))
         {
             entry = previous + previous[0];
             decompressed_text += entry;
-            dictionaryReverse.push_back(entry);
+            dictionary_reverse.push_back(entry);
         }
         else
         {
             std::cerr << "Error de descompresión: código no válido." << std::endl;
-            return output_buffer;
+            return decompressed_text;
         }
         previous = entry;
-
-        // Verificar si se ha encontrado una nueva línea en el texto descomprimido
-        size_t newline_pos;
-        while ((newline_pos = decompressed_text.find('\n')) != std::string::npos)
-        {
-            output_buffer.push_back(decompressed_text.substr(0, newline_pos)); // Agregar la línea al buffer
-            decompressed_text.erase(0, newline_pos + 1);                       // Eliminar la línea del texto descomprimido
-        }
     }
 
+    return decompressed_text;
+}
+
+void LZS::compress(std::vector<std::string> &content, const std::string &output_file)
+{
+    std::ofstream fout(output_file, std::ios::binary);
+
+    if (!fout)
+    {
+        std::cerr << "Error opening output file." << std::endl;
+        return;
+    }
+
+    std::string text = join_vector(content);
+    std::string rle_text = rle_compress(text);
+
+    lzw_compress(rle_text, fout);
+
+    fout.close();
+    std::cout << "Archivo comprimido con éxito!" << std::endl;
+}
+
+std::vector<std::string> LZS::decompress(const std::string &input_file)
+{
+    std::ifstream fin(input_file, std::ios::binary);
+    std::vector<std::string> output_buffer;
+
+    if (!fin)
+    {
+        std::cerr << "Error al abrir el archivo de entrada." << std::endl;
+        return output_buffer;
+    }
+
+    std::string decompressed_text = lzw_decompress(fin);
+
+    std::string rle_text;
     if (!decompressed_text.empty())
     {
-        output_buffer.push_back(decompressed_text); // Agregar la última línea al buffer
+        rle_text = rle_decompress(decompressed_text);
+    }
+
+    std::istringstream iss(rle_text);
+    std::string line;
+    while (std::getline(iss, line))
+    {
+        output_buffer.push_back(line);
     }
 
     return output_buffer;
 }
 
-void LZS::escribir_codigo(int code, std::ofstream &fout)
+void LZS::write_code(int code, std::ofstream &fout)
 {
     fout.write(reinterpret_cast<const char *>(&code), sizeof(code));
 }

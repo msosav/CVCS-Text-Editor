@@ -1,7 +1,7 @@
 #include "editor.h"
 
 Editor::Editor(const char *file_name, const std::vector<std::string> &content) noexcept
-	: screen{file_name, content}, lsz(), file_contents{content}
+	: screen{file_name, content}, lzs(), file_contents{content}
 {
 	screen.display(std::begin(file_contents),
 				   std::end(file_contents),
@@ -56,7 +56,7 @@ void Editor::normal_mode_action(int character) noexcept
 		break;
 	case 'q':
 		endwin();
-		lsz.comprimir(file_contents, "prueba.bin");
+		lzs.comprimir(file_contents, "comprimido.bin");
 		exit(1);
 		break;
 	case 'l':

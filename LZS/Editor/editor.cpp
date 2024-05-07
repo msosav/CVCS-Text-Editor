@@ -1,16 +1,16 @@
 #include "editor.h"
 
-Editor::Editor(const char *file_name, const std::vector<std::string> &content) noexcept
-	: screen{file_name, content}, lsz(), file_contents{content}
+Editor::Editor(const char *file_name, const std::vector<std::string> &buffer, const char *output_file_name) noexcept
+	: screen{file_name, buffer}, lsz(), file_buffer{buffer}
 {
-	screen.display(std::begin(file_contents),
-				   std::end(file_contents),
+	screen.display(std::begin(file_buffer),
+				   std::end(file_buffer),
 				   cursor);
 }
 
-std::vector<std::string> Editor::create_file_contents(FILE *file) const noexcept
+std::vector<std::string> Editor::create_file_buffer(FILE *file) const noexcept
 {
-	std::vector<std::string> file_contents;
+	std::vector<std::string> file_buffer;
 	std::string file_line;
 	char c;
 	while ((c = fgetc(file)) != EOF)
@@ -21,11 +21,11 @@ std::vector<std::string> Editor::create_file_contents(FILE *file) const noexcept
 		}
 		else
 		{
-			file_contents.push_back(file_line);
+			file_buffer.push_back(file_line);
 			file_line = "";
 		}
 	}
-	return file_contents;
+	return file_buffer;
 }
 
 void Editor::process_keypress(int character) noexcept
@@ -42,8 +42,8 @@ void Editor::process_keypress(int character) noexcept
 		replace_mode_action(character);
 		break;
 	}
-	screen.display(std::begin(file_contents) + top_of_screen_index,
-				   std::end(file_contents),
+	screen.display(std::begin(file_buffer) + top_of_screen_index,
+				   std::end(file_buffer),
 				   cursor);
 }
 
@@ -56,7 +56,7 @@ void Editor::normal_mode_action(int character) noexcept
 		break;
 	case 'q':
 		endwin();
-		lsz.comprimir(file_contents, "prueba.bin");
+		lsz.compress(file_buffer, "compressed.bin");
 		exit(1);
 		break;
 	case 'l':
@@ -72,7 +72,7 @@ void Editor::normal_mode_action(int character) noexcept
 		move_cursor_left();
 		break;
 	case 'x':
-		file_contents[file_contents_index].replace(cursor.row_offset, 1, "");
+		file_buffer[file_buffer_index].replace(cursor.row_offset, 1, "");
 		break;
 	case 'w':
 		do_w_motion();
@@ -88,8 +88,8 @@ void Editor::normal_mode_action(int character) noexcept
 
 void Editor::move_cursor_right() noexcept
 {
-	const auto &current_line = file_contents[file_contents_index];
-	if (file_contents_index < file_contents.size() && cursor.row_offset < current_line.size())
+	const auto &current_line = file_buffer[file_buffer_index];
+	if (file_buffer_index < file_buffer.size() && cursor.row_offset < current_line.size())
 	{
 		if (current_line[cursor.row_offset] == '\t')
 		{
@@ -106,10 +106,10 @@ void Editor::move_cursor_right() noexcept
 
 void Editor::move_cursor_up() noexcept
 {
-	if (file_contents_index != 0)
+	if (file_buffer_index != 0)
 	{
-		const auto &line_above = file_contents[file_contents_index - 1];
-		const auto &current_line = file_contents[file_contents_index];
+		const auto &line_above = file_buffer[file_buffer_index - 1];
+		const auto &current_line = file_buffer[file_buffer_index];
 
 		move_cursor_x_considering_lines(line_above, current_line);
 	}
@@ -117,11 +117,11 @@ void Editor::move_cursor_up() noexcept
 	if (cursor.y != 0)
 	{
 		--cursor.y;
-		--file_contents_index;
+		--file_buffer_index;
 	}
-	else if (file_contents_index != 0)
+	else if (file_buffer_index != 0)
 	{
-		--file_contents_index;
+		--file_buffer_index;
 		--top_of_screen_index;
 	}
 }
@@ -146,12 +146,12 @@ void Editor::move_cursor_x_considering_lines(
 
 void Editor::move_cursor_down() noexcept
 {
-	if (file_contents_index < file_contents.size())
+	if (file_buffer_index < file_buffer.size())
 	{
-		if (file_contents_index + 1 < file_contents.size())
+		if (file_buffer_index + 1 < file_buffer.size())
 		{
-			const auto &current_line = file_contents[file_contents_index];
-			const auto &line_below = file_contents[file_contents_index + 1];
+			const auto &current_line = file_buffer[file_buffer_index];
+			const auto &line_below = file_buffer[file_buffer_index + 1];
 			move_cursor_x_considering_lines(line_below, current_line);
 		}
 		// We check for cursor.y + 1 here rather than just cursor.y.
@@ -162,12 +162,12 @@ void Editor::move_cursor_down() noexcept
 		if (cursor.y + 1 != screen.rows)
 		{
 			++cursor.y;
-			++file_contents_index;
+			++file_buffer_index;
 		}
 		else
 		{
 			++top_of_screen_index;
-			++file_contents_index;
+			++file_buffer_index;
 		}
 	}
 }
@@ -176,7 +176,7 @@ void Editor::move_cursor_left() noexcept
 {
 	if (cursor.row_offset > 0)
 	{
-		const auto &current_line = file_contents[file_contents_index];
+		const auto &current_line = file_buffer[file_buffer_index];
 		if (current_line[cursor.row_offset - 1] == '\t')
 		{
 			cursor.x -= SPACES_FOR_TAB;
@@ -192,7 +192,7 @@ void Editor::move_cursor_left() noexcept
 
 void Editor::do_w_motion() noexcept
 {
-	std::size_t next_space_index = file_contents[file_contents_index]
+	std::size_t next_space_index = file_buffer[file_buffer_index]
 									   .find_first_of(" ", cursor.x);
 
 	if (next_space_index != std::string::npos)
@@ -204,7 +204,7 @@ void Editor::do_w_motion() noexcept
 
 void Editor::do_b_motion() noexcept
 {
-	const auto &current_line = file_contents[file_contents_index];
+	const auto &current_line = file_buffer[file_buffer_index];
 
 	std::size_t previous_space_index = cursor.x;
 	for (; previous_space_index != 0; --previous_space_index)
@@ -261,15 +261,15 @@ void Editor::replace_mode_action(int character) noexcept
 void Editor::delete_char() noexcept
 {
 	// If we're not past the end of the file
-	if (file_contents_index < file_contents.size())
+	if (file_buffer_index < file_buffer.size())
 	{
 		// If a line is empty and we just pressed the delete key at the left-
 		// most edge of the screen
-		auto &current_line = file_contents[file_contents_index];
+		auto &current_line = file_buffer[file_buffer_index];
 		if (cursor.row_offset == 0 && current_line.size() == 0)
 		{
 			// Then delete the whole line
-			file_contents.erase(std::begin(file_contents) + file_contents_index);
+			file_buffer.erase(std::begin(file_buffer) + file_buffer_index);
 		}
 		else
 		{
@@ -282,17 +282,17 @@ void Editor::delete_char() noexcept
 
 void Editor::add_new_line() noexcept
 {
-	if (file_contents_index < file_contents.size())
+	if (file_buffer_index < file_buffer.size())
 	{
-		auto &current_line = file_contents[file_contents_index];
+		auto &current_line = file_buffer[file_buffer_index];
 
 		std::string rest_of_line{std::begin(current_line) + cursor.row_offset,
 								 std::end(current_line)};
 
 		current_line.erase(cursor.row_offset, current_line.size());
 
-		file_contents.insert(
-			std::begin(file_contents) + file_contents_index + 1,
+		file_buffer.insert(
+			std::begin(file_buffer) + file_buffer_index + 1,
 			rest_of_line);
 
 		move_cursor_down();
@@ -301,7 +301,7 @@ void Editor::add_new_line() noexcept
 	}
 	else
 	{
-		file_contents.push_back("");
+		file_buffer.push_back("");
 	}
 
 	screen.is_file_modified = true;
@@ -309,10 +309,10 @@ void Editor::add_new_line() noexcept
 
 void Editor::insert_char(int character) noexcept
 {
-	if (file_contents_index < file_contents.size())
+	if (file_buffer_index < file_buffer.size())
 	{
-		auto &current_line = file_contents[file_contents_index];
-		if (cursor.row_offset < file_contents[file_contents_index].size())
+		auto &current_line = file_buffer[file_buffer_index];
+		if (cursor.row_offset < file_buffer[file_buffer_index].size())
 		{
 			current_line.insert(cursor.row_offset, 1, character);
 		}
@@ -327,17 +327,17 @@ void Editor::insert_char(int character) noexcept
 	else
 	{
 		// Append a new, empty line
-		file_contents.push_back("");
+		file_buffer.push_back("");
 	}
 	screen.is_file_modified = true;
 }
 
 void Editor::replace_char(int character) noexcept
 {
-	if (file_contents_index < file_contents.size())
+	if (file_buffer_index < file_buffer.size())
 	{
-		auto &current_line = file_contents[file_contents_index];
-		if (cursor.row_offset < file_contents[file_contents_index].size())
+		auto &current_line = file_buffer[file_buffer_index];
+		if (cursor.row_offset < file_buffer[file_buffer_index].size())
 		{
 			current_line[cursor.row_offset] = character;
 		}
@@ -352,7 +352,7 @@ void Editor::replace_char(int character) noexcept
 	else
 	{
 		// Append a new, empty line
-		file_contents.push_back("");
+		file_buffer.push_back("");
 	}
 	screen.is_file_modified = true;
 }
