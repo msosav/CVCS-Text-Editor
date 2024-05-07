@@ -11,9 +11,9 @@ void run_editor(const char *file_name)
         if (std::filesystem::path(file_name).extension() == ".bin")
         {
             LZS lzs;
-            std::vector<std::string> content = lzs.descomprimir(file_name);
+            std::vector<std::string> buffer = lzs.decompress(file_name);
 
-            Editor e(file_name, content);
+            Editor e(file_name, buffer);
 
             int character;
             while (true)
@@ -26,12 +26,12 @@ void run_editor(const char *file_name)
         {
             FILE *file;
             file = fopen(file_name, "r+");
-            std::vector<std::string> content;
+            std::vector<std::string> buffer;
             Editor e;
 
             if (file != nullptr)
             {
-                content = e.create_file_contents(file);
+                buffer = e.create_file_buffers(file);
                 fclose(file);
             }
             else
@@ -40,7 +40,7 @@ void run_editor(const char *file_name)
                 return;
             }
 
-            Editor ed(file_name, content);
+            Editor ed(file_name, buffer);
 
             int character;
             while (true)
