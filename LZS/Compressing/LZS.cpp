@@ -31,6 +31,8 @@ void LZS::comprimir(std::vector<std::string> &content, const std::string &output
         return;
     }
 
+    std::cout << "Buffer size:" << content.size() << std::endl;
+
     std::string current;
     for (const std::string &line : content)
     {
@@ -51,6 +53,11 @@ void LZS::comprimir(std::vector<std::string> &content, const std::string &output
                 current = std::string(1, ch);
             }
         }
+        // Agregar un salto de línea al final de cada línea
+        escribir_codigo(dictionary[current], fout);
+        current.clear(); // Limpiar el buffer de caracteres
+        // Escribir el código del salto de línea
+        escribir_codigo(dictionary[std::string(1, '\n')], fout);
     }
 
     if (!current.empty())
@@ -70,7 +77,7 @@ std::vector<std::string> LZS::descomprimir(const std::string &input_file)
 
     if (!fin)
     {
-        std::cerr << "Error opening input file." << std::endl;
+        std::cerr << "Error al abrir el archivo de entrada." << std::endl;
         return output_buffer; // Devuelve un buffer vacío en caso de error
     }
 
@@ -104,7 +111,16 @@ std::vector<std::string> LZS::descomprimir(const std::string &input_file)
         if (code < static_cast<int>(dictionaryReverse.size()))
         {
             entry = dictionaryReverse[code];
-            decompressed_text += entry;
+            if (entry == "\n")
+            {
+                std::cout << "Línea descomprimida: " << decompressed_text << std::endl;
+                output_buffer.push_back(decompressed_text); // Agregar la línea al buffer
+                decompressed_text.clear();                  // Limpiar el texto descomprimido para la siguiente línea
+            }
+            else
+            {
+                decompressed_text += entry;
+            }
             dictionaryReverse.push_back(previous + entry[0]);
         }
         else if (code == static_cast<int>(dictionaryReverse.size()))
@@ -121,15 +137,13 @@ std::vector<std::string> LZS::descomprimir(const std::string &input_file)
         previous = entry;
     }
 
-    output_buffer.push_back(decompressed_text);
+    if (!decompressed_text.empty())
+    {
+        output_buffer.push_back(decompressed_text); // Agregar la última línea al buffer
+    }
 
     std::cout << "Archivo descomprimido con éxito!" << std::endl;
-    std::cout << "Buffer:" << std::endl;
-
-    for (const std::string &line : output_buffer)
-    {
-        std::cout << line;
-    }
+    std::cout << "Tamaño del buffer:" << output_buffer.size() << std::endl;
 
     return output_buffer;
 }

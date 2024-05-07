@@ -52,7 +52,7 @@ class Editor
     void add_new_line() noexcept;
 
 public:
-    Editor(const std::vector<std::string> &content = {}) noexcept;
+    Editor(const char *file_name = "", const std::vector<std::string> &content = {}) noexcept;
     Editor(const Editor &e) = delete;
     Editor &operator=(const Editor &e) = delete;
 

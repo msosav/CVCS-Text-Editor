@@ -1,11 +1,11 @@
 #include "editor.h"
 
-Editor::Editor(const std::vector<std::string> &content) noexcept
-    : screen{"", content}, lsz(), file_contents{content}
+Editor::Editor(const char *file_name, const std::vector<std::string> &content) noexcept
+	: screen{file_name, content}, lsz(), file_contents{content}
 {
-    screen.display(std::begin(file_contents),
-                   std::end(file_contents),
-                   cursor);
+	screen.display(std::begin(file_contents),
+				   std::end(file_contents),
+				   cursor);
 }
 
 std::vector<std::string> Editor::create_file_contents(FILE *file) const noexcept
@@ -27,7 +27,6 @@ std::vector<std::string> Editor::create_file_contents(FILE *file) const noexcept
 	}
 	return file_contents;
 }
-
 
 void Editor::process_keypress(int character) noexcept
 {
@@ -357,4 +356,3 @@ void Editor::replace_char(int character) noexcept
 	}
 	screen.is_file_modified = true;
 }
-
