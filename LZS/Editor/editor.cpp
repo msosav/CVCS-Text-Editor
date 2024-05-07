@@ -1,6 +1,6 @@
 #include "editor.h"
 
-Editor::Editor(const char *file_name, const std::vector<std::string> &buffer) noexcept
+Editor::Editor(const char *file_name, const std::vector<std::string> &buffer, const char *output_file_name) noexcept
 	: screen{file_name, buffer}, lsz(), file_buffer{buffer}
 {
 	screen.display(std::begin(file_buffer),
@@ -56,7 +56,7 @@ void Editor::normal_mode_action(int character) noexcept
 		break;
 	case 'q':
 		endwin();
-		lsz.compress(file_buffer, "prueba.bin");
+		lsz.compress(file_buffer, "compressed.bin");
 		exit(1);
 		break;
 	case 'l':
