@@ -17,8 +17,16 @@ void LZS::inicializar_diccionario()
         std::string ch(1, char(i));
         dictionary[ch] = i;
     }
+}
 
-    dictionary[std::string(1, '\n')] = 256; // Añadir el salto de línea al diccionario
+std::string juntar_vector(const std::vector<std::string> &v)
+{
+    std::string result;
+    for (const std::string &line : v)
+    {
+        result += line + '\n';
+    }
+    return result;
 }
 
 void LZS::comprimir(std::vector<std::string> &content, const std::string &output_file)
@@ -33,31 +41,23 @@ void LZS::comprimir(std::vector<std::string> &content, const std::string &output
 
     std::cout << "Buffer size:" << content.size() << std::endl;
 
+    std::string text = juntar_vector(content);
+
     std::string current;
-    for (const std::string &line : content)
+    for (char ch : text)
     {
-        for (char ch : line)
+        std::string temp = current + ch;
+
+        if (dictionary.find(temp) != dictionary.end())
         {
-            std::string temp = current + ch;
-            if (dictionary.find(temp) != dictionary.end())
-            {
-                current = temp;
-            }
-            else
-            {
-                escribir_codigo(dictionary[current], fout);
-                if (dictionary.size() < static_cast<size_t>(MAX_DICT_SIZE))
-                {
-                    dictionary[temp] = static_cast<int>(dictionary.size());
-                }
-                current = std::string(1, ch);
-            }
+            current = temp;
         }
-        // Agregar un salto de línea al final de cada línea
-        escribir_codigo(dictionary[current], fout);
-        current.clear(); // Limpiar el buffer de caracteres
-        // Escribir el código del salto de línea
-        escribir_codigo(dictionary[std::string(1, '\n')], fout);
+        else
+        {
+            escribir_codigo(dictionary[current], fout);
+            dictionary[temp] = dictionary.size();
+            current = std::string(1, ch);
+        }
     }
 
     if (!current.empty())
@@ -111,16 +111,7 @@ std::vector<std::string> LZS::descomprimir(const std::string &input_file)
         if (code < static_cast<int>(dictionaryReverse.size()))
         {
             entry = dictionaryReverse[code];
-            if (entry == "\n")
-            {
-                std::cout << "Línea descomprimida: " << decompressed_text << std::endl;
-                output_buffer.push_back(decompressed_text); // Agregar la línea al buffer
-                decompressed_text.clear();                  // Limpiar el texto descomprimido para la siguiente línea
-            }
-            else
-            {
-                decompressed_text += entry;
-            }
+            decompressed_text += entry;
             dictionaryReverse.push_back(previous + entry[0]);
         }
         else if (code == static_cast<int>(dictionaryReverse.size()))
@@ -135,6 +126,14 @@ std::vector<std::string> LZS::descomprimir(const std::string &input_file)
             return output_buffer;
         }
         previous = entry;
+
+        // Verificar si se ha encontrado una nueva línea en el texto descomprimido
+        size_t newline_pos;
+        while ((newline_pos = decompressed_text.find('\n')) != std::string::npos)
+        {
+            output_buffer.push_back(decompressed_text.substr(0, newline_pos)); // Agregar la línea al buffer
+            decompressed_text.erase(0, newline_pos + 1);                       // Eliminar la línea del texto descomprimido
+        }
     }
 
     if (!decompressed_text.empty())
