@@ -17,13 +17,15 @@ public:
 	std::size_t cols;
 	bool is_file_modified{false};
 
-	Screen(const char *file_name) noexcept;
+	Screen(const char *file_name, std::vector<std::string> content) noexcept;
 	Screen(const Screen &s) = delete;
 	Screen &operator=(const Screen &s) = delete;
 
+	mutable std::vector<std::string> content;
+
 	void display(std::vector<std::string>::const_iterator begin,
-				 std::vector<std::string>::const_iterator end,
-				 const Cursor &cursor) const noexcept;
+				std::vector<std::string>::const_iterator end,
+				const Cursor &cursor) const noexcept;
 
 	~Screen();
 
@@ -34,5 +36,6 @@ private:
 	void move_cursor(const Cursor &cursor) const noexcept;
 
 	void draw_file_info_bar() const noexcept;
+	std::vector<std::string> get_content() const noexcept;
 };
 #endif

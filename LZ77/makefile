@@ -1,6 +1,6 @@
-CPP_FLAGS = -std=c++14 -Wall -Werror -Wpedantic -Weffc++
+CPP_FLAGS = -std=c++17 -Wall -Werror -Wpedantic -Weffc++
 
-FILES = Screen/screen.cpp Editor/editor.cpp main.cpp
+FILES = Screen/screen.cpp Editor/editor.cpp main.cpp Compressing/LZ77.cpp
 
 cvcs: ${FILES}
 	g++ -O3 ${CPP_FLAGS} ${FILES} -o cvcs -lncurses

@@ -4,8 +4,8 @@
 // That is why the color here starts at 1 and not 0.
 static const int FILE_BAR_COLOR = 1;
 
-Screen::Screen(const char *file_name) noexcept
-	: rows{}, cols{}, file_name{file_name}, file_info_bar{}
+Screen::Screen(const char *file_name, std::vector<std::string> content) noexcept
+	: rows{}, cols{}, content{content}, file_name{file_name}, file_info_bar{}
 {
 	initscr();
 	start_color();
@@ -24,14 +24,15 @@ Screen::Screen(const char *file_name) noexcept
 }
 
 void Screen::display(std::vector<std::string>::const_iterator begin,
-					 std::vector<std::string>::const_iterator end,
-					 const Cursor &cursor) const noexcept
+					std::vector<std::string>::const_iterator end,
+					const Cursor &cursor) const noexcept
 {
 	// We need to clear the screen before displaying it to make sure
 	// that scrolling works correctly. If we didn't call clear() here,
 	// lines that are bigger than the lines that are about to be displayed
 	// on the screen would still partially show up on the screen
 	clear();
+	content.clear();
 	std::size_t i = 0;
 	// We need to check if i == rows - 1 because if we don't, the screen
 	// will omit lines.
@@ -39,6 +40,7 @@ void Screen::display(std::vector<std::string>::const_iterator begin,
 		 ++iterator, ++i)
 	{
 		printw("%s", iterator->c_str());
+		content.push_back(*iterator); 
 		if (i != rows - 1)
 		{
 			printw("\n");
@@ -75,6 +77,11 @@ void Screen::draw_file_info_bar() const noexcept
 void Screen::move_cursor(const Cursor &cursor) const noexcept
 {
 	move(cursor.y, cursor.x);
+}
+
+std::vector<std::string> Screen::get_content() const noexcept
+{
+	return content;
 }
 
 Screen::~Screen()
