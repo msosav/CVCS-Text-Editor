@@ -10,7 +10,6 @@
 class LZS {
 private:
     std::unordered_map<std::string, int> dictionary;
-    static const int MAX_DICT_SIZE = 16384; // Declare MAX_DICT_SIZE as static const
 
 public:
     LZS();
