@@ -31,7 +31,7 @@ void run_editor(const char *file_name)
 
             if (file != nullptr)
             {
-                buffer = e.create_file_buffers(file);
+                buffer = e.create_file_buffer(file);
                 fclose(file);
             }
             else

@@ -26,9 +26,9 @@ class Editor
     Screen screen;
     LZS lsz;
     Mode current_mode{Mode::NORMAL};
-    std::vector<std::string> file_buffers;
+    std::vector<std::string> file_buffer;
     Cursor cursor{};
-    std::size_t file_buffers_index = 0;
+    std::size_t file_buffer_index = 0;
     std::size_t top_of_screen_index = 0;
 
     void move_cursor_down() noexcept;
@@ -57,8 +57,8 @@ public:
     Editor &operator=(const Editor &e) = delete;
 
     void process_keypress(int character) noexcept;
-    std::vector<std::string> create_file_buffers(FILE *file) const noexcept;
-    std::vector<std::string> get_file_buffers() const noexcept;
+    std::vector<std::string> create_file_buffer(FILE *file) const noexcept;
+    std::vector<std::string> get_file_buffer() const noexcept;
 };
 
 #endif
