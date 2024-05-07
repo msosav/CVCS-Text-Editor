@@ -38,13 +38,19 @@ void run_editor(const char *file_name)
             Editor ed(file_name, content);
 
             int character;
-            while (true)
-            {
+            while (true) {
                 character = getch();
                 ed.process_keypress(character);
             }
         }
-    }
+    } else {
+		Editor e(file_name);
+        int character;
+        while (true) {
+            character = getch();
+            e.process_keypress(character);
+        }
+	}
 }
 
 
