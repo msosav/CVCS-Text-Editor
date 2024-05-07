@@ -7,7 +7,7 @@
 
 #include "../Screen/screen.h"
 #include "../Cursor/cursor.h"
-#include "../Compressing/LZS.h"
+#include "../Compressing/LZW.h"
 
 enum class Mode
 {
@@ -24,7 +24,7 @@ static const int ENTER_KEY = '\xA';
 class Editor
 {
     Screen screen;
-    LZS lsz;
+    LZW lzs;
     Mode current_mode{Mode::NORMAL};
     std::vector<std::string> file_contents;
     Cursor cursor{};

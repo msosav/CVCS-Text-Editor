@@ -1,5 +1,5 @@
 #include "Editor/editor.h"
-#include "Compressing/LZS.h"
+#include "Compressing/LZW.h"
 #include <ncurses.h>
 #include <filesystem>
 #include <iostream>
@@ -10,8 +10,8 @@ void run_editor(const char *file_name)
     {
         if (std::filesystem::path(file_name).extension() == ".bin")
         {
-            LZS lzs;
-            std::vector<std::string> content = lzs.descomprimir(file_name);
+            LZW LZW;
+            std::vector<std::string> content = LZW.descomprimir(file_name);
 
             Editor e(file_name, content);
 
@@ -48,6 +48,15 @@ void run_editor(const char *file_name)
                 character = getch();
                 ed.process_keypress(character);
             }
+        }
+    }
+    else {
+        Editor e(file_name);
+        int character;
+        while (true)
+        {
+            character = getch();
+            e.process_keypress(character);
         }
     }
 }
