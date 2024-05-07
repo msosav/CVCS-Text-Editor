@@ -1,13 +1,13 @@
 #include "editor.h"
 
-Editor::Editor(const char* file_name) noexcept
-: file{fopen(file_name, "r+")}, screen{file_name} {
-	screen.display(std::begin(file_contents), 
-			std::end(file_contents),
-			cursor);
+Editor::Editor(const char *file_name, const std::vector<std::string> &content) noexcept
+    : screen{file_name, content}, lz77(), file_contents{content} {
+    screen.display(std::begin(file_contents),
+				std::end(file_contents),
+				cursor);
 }
 
-std::vector<std::string> Editor::create_file_contents() noexcept {
+std::vector<std::string> Editor::create_file_contents(FILE *file) const noexcept {
 	std::vector<std::string> file_contents;
 	std::string file_line;
 	char c;
@@ -23,60 +23,67 @@ std::vector<std::string> Editor::create_file_contents() noexcept {
 	return file_contents;
 }
 
-void Editor::process_keypress(int character) noexcept {
-	switch (current_mode) {
-		case Mode::NORMAL: 
-			normal_mode_action(character);
-			break;
-		case Mode::INSERT:
-			insert_mode_action(character);	
-			break;
-		case Mode::REPLACE:
-			replace_mode_action(character);
-			break;
-	}
-	screen.display(std::begin(file_contents) + top_of_screen_index,
-			std::end(file_contents),
-			cursor);
+void Editor::process_keypress(int character) noexcept
+{
+    switch (current_mode)
+    {
+    case Mode::NORMAL:
+        normal_mode_action(character);
+        break;
+    case Mode::INSERT:
+        insert_mode_action(character);
+        break;
+    case Mode::REPLACE:
+        replace_mode_action(character);
+        break;
+    }
+    screen.display(std::begin(file_contents) + top_of_screen_index,
+				std::end(file_contents),
+				cursor);
 }
 
-void Editor::normal_mode_action(int character) noexcept {
-	switch (character) {
-		case 'i':
-			current_mode = Mode::INSERT;
-			break;
-		case 'q':
-			endwin();
-			exit(1);
-			break;
-		case 'l':
-			move_cursor_right();
-			break;
-		case 'k':
-			move_cursor_up();
-			break;
-		case 'j':
-			move_cursor_down();
-			break;
-		case 'h':
-			move_cursor_left();
-			break;
-		case 'x':
-			file_contents[file_contents_index].replace(cursor.row_offset, 1, "");
-			break;
-		case 'w':
-			do_w_motion();
-			break;
-		case 'b':
-			do_b_motion();
-			break;
-		case 'R':
-			current_mode = Mode::REPLACE;
-			break;
-		case 's':
-			save();
-			break;
-	}
+void Editor::normal_mode_action(int character) noexcept
+{
+    switch (character)
+    {
+    case 'i':
+        current_mode = Mode::INSERT;
+        break;
+    case 'q':
+        endwin();
+		lz77.comprimir(file_contents, "prueba.bin");
+        exit(1);
+        break;
+    case 'l':
+        move_cursor_right();
+        break;
+    case 'k':
+        move_cursor_up();
+        break;
+    case 'j':
+        move_cursor_down();
+        break;
+    case 'h':
+        move_cursor_left();
+        break;
+    case 'x':
+        file_contents[file_contents_index].replace(cursor.row_offset, 1, "");
+        break;
+    case 'w':
+        do_w_motion();
+        break;
+    case 'b':
+        do_b_motion();
+        break;
+    case 'R':
+        current_mode = Mode::REPLACE;
+        break;
+	/*
+    case 's':
+        save();
+        break;
+	*/
+    }
 }
 
 void Editor::move_cursor_right() noexcept {
@@ -303,17 +310,4 @@ void Editor::replace_char(int character) noexcept {
 		file_contents.push_back("");
 	}
 	screen.is_file_modified = true;
-}
-
-void Editor::save() noexcept {
-	rewind(file);
-	for (const auto& str : file_contents) {
-		fputs(str.c_str(), file);	
-		fputs("\n", file);
-	}
-	screen.is_file_modified = false;
-}
-
-Editor::~Editor() {
-	fclose(file);
 }
