@@ -50,6 +50,15 @@ void run_editor(const char *file_name)
             }
         }
     }
+    else {
+        Editor e(file_name);
+        int character;
+        while (true)
+        {
+            character = getch();
+            e.process_keypress(character);
+        }
+    }
 }
 
 int main(int argc, char **argv)
