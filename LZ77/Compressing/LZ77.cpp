@@ -68,7 +68,7 @@ std::vector<std::string> LZ77::descomprimir(const std::string& archivo_comprimid
         return output_buffer; // Devuelve un buffer vacío en caso de error;
     }
 
-    std::unordered_map<int, std::string> dictionary;
+   /* std::unordered_map<int, std::string> dictionary;
     int nextCode = 1;
 
     uint16_t code;
@@ -83,7 +83,54 @@ std::vector<std::string> LZ77::descomprimir(const std::string& archivo_comprimid
             buffer = static_cast<char>(code);
         }
         dictionary[nextCode++] = buffer;
+    }*/
+
+    std::vector<std::string> dictionaryReverse;
+    for (int i = 0; i < 256; ++i) {
+        std::string ch(1, char(i));
+        dictionaryReverse.push_back(ch);
     }
+
+    int code;
+    std::string decompressed_text;
+    std::string previous, entry;
+    if (entrada.read(reinterpret_cast<char *>(&code), sizeof(code))) {
+        if (code < static_cast<int>(dictionaryReverse.size())) {
+            entry = dictionaryReverse[code];
+            decompressed_text += entry;
+            previous = entry;
+        } else {
+            std::cerr << "Error de descompresión: código no válido." << std::endl;
+            return output_buffer;
+        }
+    }
+
+    while (entrada.read(reinterpret_cast<char *>(&code), sizeof(code))) {
+        if (code < static_cast<int>(dictionaryReverse.size())) {
+            entry = dictionaryReverse[code];
+            decompressed_text += entry;
+            dictionaryReverse.push_back(previous + entry[0]);
+        } else if (code == static_cast<int>(dictionaryReverse.size())) {
+            entry = previous + previous[0];
+            decompressed_text += entry;
+            dictionaryReverse.push_back(entry);
+        } else {
+            std::cerr << "Error de descompresión: código no válido." << std::endl;
+            return output_buffer;
+        }
+        previous = entry;
+
+        // Verificar si se ha encontrado una nueva línea en el texto descomprimido
+        size_t newline_pos;
+        while ((newline_pos = decompressed_text.find('\n')) != std::string::npos) {
+            output_buffer.push_back(decompressed_text.substr(0, newline_pos)); // Agregar la línea al buffer
+            decompressed_text.erase(0, newline_pos + 1);                       // Eliminar la línea del texto descomprimido
+        }
+    }
+
+    if (!decompressed_text.empty()) {
+        output_buffer.push_back(decompressed_text); // Agregar la última línea al buffer
+        }
 
     std::cout << "Archivo descomprimido con éxito!" << std::endl;
     std::cout << "Tamaño del buffer:" << output_buffer.size() << std::endl;
