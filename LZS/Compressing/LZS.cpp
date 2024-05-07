@@ -39,8 +39,6 @@ void LZS::comprimir(std::vector<std::string> &content, const std::string &output
         return;
     }
 
-    std::cout << "Buffer size:" << content.size() << std::endl;
-
     std::string text = juntar_vector(content);
 
     std::string current;
@@ -67,7 +65,6 @@ void LZS::comprimir(std::vector<std::string> &content, const std::string &output
 
     fout.close(); // Close the output file stream
     std::cout << "Archivo comprimido con éxito!" << std::endl;
-    descomprimir(output_file);
 }
 
 std::vector<std::string> LZS::descomprimir(const std::string &input_file)
@@ -141,24 +138,10 @@ std::vector<std::string> LZS::descomprimir(const std::string &input_file)
         output_buffer.push_back(decompressed_text); // Agregar la última línea al buffer
     }
 
-    std::cout << "Archivo descomprimido con éxito!" << std::endl;
-    std::cout << "Tamaño del buffer:" << output_buffer.size() << std::endl;
-
     return output_buffer;
 }
 
 void LZS::escribir_codigo(int code, std::ofstream &fout)
 {
     fout.write(reinterpret_cast<const char *>(&code), sizeof(code));
-}
-
-void LZS::mostrarDiccionario()
-{
-    std::cout << "Diccionario actual:" << std::endl;
-    size_t i = 0;
-    for (const auto &entry : dictionary)
-    {
-        std::cout << "[" << std::setw(3) << std::dec << i << "] -> '" << entry.first << "':{" << std::hex << entry.second << " HEX}" << std::endl;
-        ++i;
-    }
 }

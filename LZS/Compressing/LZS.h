@@ -17,7 +17,6 @@ public:
 
     void comprimir(std::vector<std::string> &content, const std::string &output_file);
     std::vector<std::string> descomprimir(const std::string &input_file);
-    void mostrarDiccionario();
 
 private:
     void inicializar_diccionario();
